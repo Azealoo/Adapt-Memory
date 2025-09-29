@@ -28,6 +28,21 @@ pip install -e third-party/transformers-CFG
 pip install protobuf==3.20.3
 ```
 
+### Environment Configuration
+
+**Important:** Ensure model path configuration is correct.
+
+1. Place the Llama-3.1-8B-Instruct model in the `models/` directory
+2. Ensure `BASE_DIR` in `src/utils.py` points to the correct project root directory
+3. If you encounter path issues, you can set environment variable:
+   ```bash
+   export MAITHILIS_CRAZY_ENV=crazy  # Only needed in specific environments
+   ```
+
+**Model Download:**
+- Download Llama-3.1-8B-Instruct model from Hugging Face to `models/Llama-3.1-8B-Instruct/` directory
+- Ensure all necessary files are included: `config.json`, `tokenizer.json`, `tokenizer_config.json`, etc.
+
 
 ### Evaluation on ADAPT
 
@@ -44,8 +59,8 @@ do
                 --generalization_category $gen \
                 --crossvalidation_split $split \
                 --logs_dir logs \
-                --model_name_planner $model_name_planner \
-                --model_name_base meta-llama/Llama-3.1-70B-Instruct
+                --model_name_planner /path/to/your/models/Llama-3.1-8B-Instruct \
+                --model_name_base /path/to/your/models/Llama-3.1-8B-Instruct
     done
 done
 ```
@@ -65,8 +80,8 @@ do
     python run_dataset_gen.py \
                     --run_config cfg/split$split"_run_config_train.json" \
                     --out_dir data \
-                    --model_name_planner meta-llama/Llama-3.1-70B-Instruct \
-                    --model_name_base meta-llama/Llama-3.1-70B-Instruct
+                    --model_name_planner /path/to/your/models/Llama-3.1-8B-Instruct \
+                    --model_name_base /path/to/your/models/Llama-3.1-8B-Instruct
 done
 ```
 
@@ -76,7 +91,7 @@ Define `trained_model` as the path to the model being output, and `logs_dirname`
 
 ```
 python train.py \
-        --base_model meta-llama/Llama-3.1-70B-Instruct \
+        --base_model /path/to/your/models/Llama-3.1-8B-Instruct \
         --trained_model $trained_model \
         --data_path $logs_dirname
 ```
