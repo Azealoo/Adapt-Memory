@@ -1,0 +1,22 @@
+# Database Configuration for Adapt-Memory
+# Copy this content to .env file and update with your actual values
+
+# Local PostgreSQL Configuration
+ADAPT_DB_HOST=localhost
+ADAPT_DB_PORT=5432
+ADAPT_DB_NAME=adapt_memory
+ADAPT_DB_USER=postgres
+ADAPT_DB_PASSWORD=your_password_here
+
+# Neon Cloud Database URL (alternative to local config)
+# Get this from your Neon dashboard
+# ADAPT_NEON_DATABASE_URL=postgresql://username:password@hostname/database?sslmode=require
+
+# Environment
+ADAPT_ENVIRONMENT=development
+
+# Database Pool Settings
+ADAPT_POOL_SIZE=5
+ADAPT_MAX_OVERFLOW=10
+ADAPT_POOL_TIMEOUT=30
+ADAPT_POOL_RECYCLE=3600

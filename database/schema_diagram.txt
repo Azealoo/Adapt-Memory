@@ -1,0 +1,125 @@
+# Adapt-Memory Database Schema Diagram (Research Context)
+
+## Entity Relationship Diagram (Text-based)
+*Note: "Users" in this schema refer to research personas (Juan, Rachel, Ramesh, Ethan) created for studying preference learning in human-robot interaction.*
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              USERS (Research Personas)                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  id (PK)           │ SERIAL PRIMARY KEY                                         │
+│  persona_id        │ VARCHAR(100) UNIQUE NOT NULL                              │
+│  name              │ VARCHAR(200)                                               │
+│  email             │ VARCHAR(255)                                               │
+│  created_at        │ TIMESTAMP WITH TIME ZONE DEFAULT NOW()                    │
+│  updated_at        │ TIMESTAMP WITH TIME ZONE                                  │
+│  is_active         │ BOOLEAN DEFAULT TRUE                                      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ 1:N
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              USER_PREFERENCES                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  id (PK)           │ SERIAL PRIMARY KEY                                         │
+│  user_id (FK)      │ INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE    │
+│  preference_type   │ VARCHAR(100) NOT NULL                                      │
+│  preference_key    │ VARCHAR(200) NOT NULL                                     │
+│  preference_value  │ TEXT NOT NULL                                             │
+│  confidence_score  │ FLOAT DEFAULT 1.0                                         │
+│  source            │ VARCHAR(100) DEFAULT 'user_feedback'                      │
+│  created_at        │ TIMESTAMP WITH TIME ZONE DEFAULT NOW()                    │
+│  updated_at        │ TIMESTAMP WITH TIME ZONE                                  │
+│  is_active         │ BOOLEAN DEFAULT TRUE                                      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ 1:N
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              USER_INTERACTIONS                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  id (PK)           │ SERIAL PRIMARY KEY                                         │
+│  user_id (FK)      │ INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE    │
+│  preference_id (FK)│ INTEGER REFERENCES user_preferences(id)                   │
+│  task              │ VARCHAR(500) NOT NULL                                      │
+│  interaction_type  │ VARCHAR(50) NOT NULL                                       │
+│  robot_action      │ TEXT                                                      │
+│  user_response     │ TEXT                                                      │
+│  context           │ JSONB                                                     │
+│  reward_score      │ FLOAT                                                     │
+│  created_at        │ TIMESTAMP WITH TIME ZONE DEFAULT NOW()                    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                TASK_HISTORY                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  id (PK)           │ SERIAL PRIMARY KEY                                         │
+│  user_id (FK)      │ INTEGER NOT NULL REFERENCES users(id)                     │
+│  task_name         │ VARCHAR(500) NOT NULL                                     │
+│  task_description  │ TEXT                                                      │
+│  success           │ BOOLEAN DEFAULT TRUE                                      │
+│  completion_time   │ FLOAT                                                      │
+│  steps_taken       │ INTEGER DEFAULT 0                                         │
+│  preferences_used  │ JSONB                                                     │
+│  final_reward      │ FLOAT                                                     │
+│  created_at        │ TIMESTAMP WITH TIME ZONE DEFAULT NOW()                    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            PREFERENCE_TEMPLATES                                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  id (PK)           │ SERIAL PRIMARY KEY                                         │
+│  template_name     │ VARCHAR(200) UNIQUE NOT NULL                               │
+│  preference_type   │ VARCHAR(100) NOT NULL                                      │
+│  template_text     │ TEXT NOT NULL                                             │
+│  is_active         │ BOOLEAN DEFAULT TRUE                                      │
+│  created_at        │ TIMESTAMP WITH TIME ZONE DEFAULT NOW()                    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Relationship Summary (Research Context)
+
+```
+USERS (Research Personas) (1) ──→ (N) USER_PREFERENCES
+    │
+    ├── (1) ──→ (N) USER_INTERACTIONS
+    │
+    └── (1) ──→ (N) TASK_HISTORY
+
+USER_PREFERENCES (1) ──→ (N) USER_INTERACTIONS
+
+PREFERENCE_TEMPLATES (standalone table)
+```
+
+## Key Relationships (Research Context)
+
+1. **Research Personas → User Preferences**: One persona can have many preferences
+2. **Research Personas → User Interactions**: One persona can have many interactions  
+3. **Research Personas → Task History**: One persona can have many task completions
+4. **User Preferences → User Interactions**: One preference can be referenced by many interactions
+5. **Preference Templates**: Standalone table for reusable templates
+
+## Data Flow (Research Context)
+
+```
+Persona-Robot Interaction → Persona Response → Preference Learning → Database Storage
+     ↓
+Task Completion → Performance Metrics → Database Storage
+     ↓
+Research Analytics & Reporting → Preference Learning Insights
+```
+
+## Index Strategy
+
+- **Primary Keys**: All tables have auto-incrementing primary keys
+- **Foreign Keys**: Indexed for join performance
+- **Search Fields**: persona_id, preference_type, interaction_type
+- **Time-based**: created_at fields for temporal queries
+- **Boolean Fields**: is_active for filtering active records
+
+## Common Query Patterns
+
+1. **Get user preferences**: `SELECT * FROM user_preferences WHERE user_id = ? AND is_active = TRUE`
+2. **Get interaction history**: `SELECT * FROM user_interactions WHERE user_id = ? ORDER BY created_at DESC`
+3. **Get task statistics**: `SELECT COUNT(*), AVG(completion_time) FROM task_history WHERE user_id = ?`
+4. **Get preference templates**: `SELECT * FROM preference_templates WHERE preference_type = ? AND is_active = TRUE`
