@@ -16,8 +16,6 @@ np.random.seed(SEED)
 torch.manual_seed(SEED)
 
 BASE_DIR = '/home/NETID/gayat23/Adapt-Memory'
-if os.environ.get('MAITHILIS_CRAZY_ENV', None) == 'crazy':
-    BASE_DIR = '/opt/hpcaas/.mounts/fs-03ee9f8c6dddfba21/jtruong/maithili'
 
 _tokenizer = AutoTokenizer.from_pretrained(f'{BASE_DIR}/models/Llama-3.1-8B-Instruct')
 
